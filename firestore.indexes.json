@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "alquileres",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "estado", "order": "ASCENDING" },
+        { "fieldPath": "fechaDevolucion", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "alquileres",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ternoId", "order": "ASCENDING" },
+        { "fieldPath": "estado", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
