@@ -8,6 +8,30 @@ const DialogTrigger = DialogPrimitive.Trigger
 const DialogPortal = DialogPrimitive.Portal
 const DialogClose = DialogPrimitive.Close
 
+function shouldPreventDialogClose(target: EventTarget | null) {
+  if (!(target instanceof Element)) return false
+
+  if (
+    target.closest('[data-slot="select-content"]') ||
+    target.closest('[data-slot="popover-content"]') ||
+    target.closest('[role="listbox"]')
+  ) {
+    return true
+  }
+
+  return !!(
+    document.querySelector('[data-slot="select-content"][data-state="open"]') ||
+    document.querySelector('[data-slot="popover-content"][data-state="open"]') ||
+    document.querySelector('[role="listbox"][data-state="open"]')
+  )
+}
+
+function handleDialogOutsideEvent(event: { preventDefault: () => void; target: EventTarget | null }) {
+  if (shouldPreventDialogClose(event.target)) {
+    event.preventDefault()
+  }
+}
+
 const DialogOverlay = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -23,16 +47,25 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 const DialogContent = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+>(({ className, children, onPointerDownOutside, onInteractOutside, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
+      data-slot="dialog-content"
       className={cn(
         'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg max-h-[90vh] overflow-y-auto',
         className,
       )}
       {...props}
+      onPointerDownOutside={(event) => {
+        handleDialogOutsideEvent(event)
+        onPointerDownOutside?.(event)
+      }}
+      onInteractOutside={(event) => {
+        handleDialogOutsideEvent(event)
+        onInteractOutside?.(event)
+      }}
     >
       {children}
       <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring">
